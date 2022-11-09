@@ -1,0 +1,125 @@
+@echo off
+rem fait
+rem correction du bug de recherche ^(le périphérique n est pas prêt^). A present on force la recherche sur le lecteur.
+rem todo 
+rem listing des fichiers sains
+rem recherche des fichiers sains par extension
+
+
+rem  rancon texte lockbit v2
+set StrLock1="Restore-My-Files\.txt"
+rem  rancon texte lockbit v3
+set StrLock2="yztubxxjx\.readme\.txt"
+rem  rancon texte lockbit v2+v3
+set StrLock3="readme.*\.lockbit"
+
+rem  rancon extension lockbit v2
+set StrLock4="\.lockbit"
+rem  rancon extension lockbit v3
+set StrLock5=".*yztubxxjx.*"
+rem  rancon extension lockbit v1
+set StrLock6="\.abcd"
+
+rem recherche sur dossier ou disque
+set SrchDir=dir /s /b /a-d
+
+rem chemin d origine du script
+set LogBitPath=%~dp0
+
+rem datetime
+for /F "skip=1" %%z in ('wmic os get localdatetime') do ( if not defined tmpDtime ( set tmpDtime=%%z ) )
+set dtime=%tmpDtime:~2,6%-%tmpDtime:~8,6%
+
+rem log principal - chemin absolu
+set FicMain=%LogBitPath%inventaire-%ComputerName%.ini 
+rem log principal avec datetime - sans chemin - pour sauvegarde au cas ou le script est lance plus d une fois
+set FicMainBak=inventaire-%ComputerName%-%dtime%.ini 
+rem log du listing fichiers - chemin absolu
+set FicAllFiles=%LogBitPath%allFiles-%ComputerName%.ini
+rem log du listing fichiers avec datetime - sans chemin - pour sauvegarde au cas ou le script est lance plus d une fois
+set FicAllFilesBak=allFiles-%ComputerName%-%dtime%.ini
+
+
+rem set TmpLooped=undefined
+
+if exist %FicMain% (
+	rename %FicMain% %FicMainBak%
+)
+echo ---------------------------------------------
+echo LogBit 0.2 (contact tel: 245)
+echo ---------------------------------------------
+echo --------------------------------------------- >> %FicMain%
+echo ORDINATEUR %ComputerName%
+echo ORDINATEUR %ComputerName% >> %FicMain%
+echo ---------------------------------------------
+echo --------------------------------------------- >> %FicMain%
+
+
+rem for /F "delims=" %%a in ('wmic logicaldisk get name ^| find /v  "Name" ^| find /v "Commande") do (
+for /F "delims=" %%a in ('wmic logicaldisk get name ^| find /v "Name"  ') do (
+	SETLOCAL EnableDelayedExpansion
+	set "TmpLooped=%%a"
+	set "DiskLtr=%%a"
+	set "TmpLooped=!TmpLooped:~1,1!"
+	if "!TmpLooped!"==":" (
+		set "DiskLtr=!DiskLtr:~0,2!"
+		rem echo %%a
+		!DiskLtr!
+		cd \
+		echo ---------------------------------------------
+		echo --------------------------------------------- >> %FicMain%
+		echo disque %%a
+		echo disque %%a >> %FicMain%
+		echo ---------------------------------------------
+		echo --------------------------------------------- >> %FicMain%
+		set /a "compteur=0"
+		echo %SrchDir% !DiskLtr!\ ^| findstr /i !StrLock1! ^| findstr "^^" ^| find /c ":" >> %FicMain%
+		FOR  /F "delims=" %%d in ('%SrchDir% !DiskLtr!\ ^| findstr /i !StrLock1! ^| findstr "^^" ^| find /c ":" ') do (
+			set "compteur=!compteur!+%%d"
+		 	echo !StrLock1! = nb : "%%d" .
+		 	echo !StrLock1! = nb : "%%d" . >> %FicMain%
+			
+		)
+		echo %SrchDir% !DiskLtr!\ ^| findstr /i !StrLock2! ^| findstr "^^" ^| find /c ":" >> %FicMain%
+		FOR  /F "delims=" %%e in ('%SrchDir% ^| findstr /i !StrLock2! ^| findstr "^^" ^| find /c ":" ') do (
+			set /a "compteur=!compteur!+%%e"
+		 	echo !StrLock2! = nb : "%%e" .
+		 	echo !StrLock2! = nb : "%%e" . >> %FicMain%
+		)
+		echo %SrchDir% !DiskLtr!\ ^| findstr /i !StrLock3! ^| findstr "^^" ^| find /c ":" >> %FicMain%
+		FOR  /F "delims=" %%f in ('%SrchDir% ^| findstr /i !StrLock3! ^| findstr "^^" ^| find /c ":" ') do (
+			set /a "compteur=!compteur!+%%f"
+		 	echo !StrLock3! = nb : "%%f" .
+		 	echo !StrLock3! = nb : "%%f" . >> %FicMain%
+		)
+		echo %SrchDir% !DiskLtr!\ ^| findstr /i !StrLock4! ^| findstr "^^" ^| find /c ":" >> %FicMain%
+		FOR  /F "delims=" %%g in ('%SrchDir% ^| findstr /i !StrLock4! ^| findstr "^^" ^| find /c ":" ') do (
+			set /a "compteur=!compteur!+%%g"
+		 	echo !StrLock4! = nb : "%%g" .
+		 	echo !StrLock4! = nb : "%%g" . >> %FicMain%
+		)
+		echo %SrchDir% !DiskLtr!\ ^| findstr /i !StrLock5! ^| findstr "^^" ^| find /c ":" >> %FicMain%
+		FOR  /F "delims=" %%h in ('%SrchDir% ^| findstr /i !StrLock5! ^| findstr "^^" ^| find /c ":" ') do (
+			set /a "compteur=!compteur!+%%h"
+		 	echo !StrLock5! = nb : "%%h" .
+		 	echo !StrLock5! = nb : "%%h" . >> %FicMain%
+		)
+		echo %SrchDir% !DiskLtr!\ ^| findstr /i !StrLock6! ^| findstr "^^" ^| find /c ":" >> %FicMain%
+		FOR  /F "delims=" %%i in ('%SrchDir% ^| findstr /i !StrLock6! ^| findstr "^^" ^| find /c ":" ') do (
+			set /a "compteur=!compteur!+%%i"
+		 	echo !StrLock6! = nb : "%%i" .
+		 	echo !StrLock6! = nb : "%%i" . >> %FicMain%
+		)
+		echo TOTAL : !compteur!
+		echo TOTAL : !compteur! >> %FicMain%
+		if !compteur!==0 (
+			echo Le lecteur !DiskLtr! est SAIN .	
+			echo Le lecteur !DiskLtr! est SAIN .	 >> %FicMain%
+		)  else (	
+			echo Le lecteur !DiskLtr! est CORROMPU  ^( !compteur! fichiers lockbit ^) .	
+			echo Le lecteur !DiskLtr! est CORROMPU  ^( !compteur! fichiers lockbit ^) .	 >> %FicMain%
+		)
+	)
+ 	endlocal
+)
+pause
